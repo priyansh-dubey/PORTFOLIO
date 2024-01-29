@@ -1,0 +1,157 @@
+body{
+
+    background: linear-gradient(90deg, hsla(332, 100%, 28%,      1) 0%, hsla(212, 100%, 20%, 1) 100%);
+
+    padding-left: 90px;
+    padding-right: 90px;
+    color: white;
+     
+
+}
+
+nav{
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#name{
+    color: rgb(255, 255, 255);
+    transform: translateX(-200px);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+#aboutdiv{
+    transform: translateX(-20px);
+    display: flex;
+    
+}
+
+.BAR{
+    list-style: none;
+    padding: 10px;
+}
+ li a{
+
+    color: bisque;
+    text-decoration: none;
+ }
+
+#body{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 80px;
+    
+}
+
+#bodyimg{
+
+    border: 2px solid rgb(68, 0, 59);
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: hsl(303, 37%, 35%);
+}
+
+#body h1{
+
+    font-size: 75px;
+    font-family: monospace;
+    margin: 1px 1px;
+}
+
+#body h3{
+
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    word-spacing: 1px;
+}
+
+.button{
+
+    margin: 10px;
+    justify-content: space-between;
+    width: 120px;
+    height: 30px;
+    border-radius: 20px;
+    border-color: rgb(81, 81, 230);
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bolder;
+}
+
+/* about section */
+
+
+#h1{
+    font-size: 22px;
+    margin-top: 60px;
+    display: flex;
+    justify-content: center;
+}
+
+#aboutme{
+    display: flex;
+    justify-content: space-evenly;
+    margin-bottom: 20px;
+}
+
+#aboutme p{
+
+    margin-left: 50px;
+    font-size: 18px;
+    margin-top: 70px;
+}
+
+#aboutme img{
+
+    border-radius: 10px;
+    transform: translateX(-20px);
+    transform: translateY(-20px);
+    box-shadow: 20px 20px rgb(70, 70, 255);
+    margin-top: 40px;
+    
+}
+
+.Experience{
+
+    display: flex;
+    justify-content: space-evenly; 
+    margin-top: 60px;
+    margin-bottom: 50px;
+   
+}
+
+.text{
+
+    margin-left: 25px;
+}
+
+
+.detail{ 
+
+    width: 300px;
+    height: 40px;
+    padding-left: 30px;
+    border-radius: 10px;
+    margin: 20px 10px 10px 10px;
+}
+
+#input{
+
+    height: 40px;
+    width: 300px;
+    border-radius: 10px;
+    margin: 10px 10px 10px 10px;
+    padding-left: 30px;
+    padding-bottom: 140px;
+}
+
+#right{
+
+    font-size: 22px;
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+ 
