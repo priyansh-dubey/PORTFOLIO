@@ -16,7 +16,7 @@ async function run() {
   try {
     // 1) Get the diff for this PR
     const diff = execSync(`git diff ${baseSha} ${headSha}`, {
-      maxBuffer: 1024 * 1024 * 50, // up to ~50MB
+      maxBuffer: 1024 * 1024 * 50,
       stdio: ["ignore", "pipe", "pipe"],
     }).toString();
 
@@ -31,8 +31,8 @@ async function run() {
       return;
     }
 
-    // 2) Keep payload reasonable for the model
-    const MAX_CHARS = 40000; // MVP: trim if too large
+    // 2) Limit diff size
+    const MAX_CHARS = 40000;
     let truncated = false;
     let diffForAI = diff;
     if (diff.length > MAX_CHARS) {
@@ -40,35 +40,41 @@ async function run() {
       truncated = true;
     }
 
-    // 3) Ask the AI to review the changes
+    // 3) Ask AI to review JS/TS changes
     const prompt = `
-You are a senior code reviewer. Analyze the following git diff and produce:
-- Key risks/bugs introduced
-- Security or performance concerns
-- Backwards-compatibility issues
-- Concrete test cases to add
+    You are a senior JavaScript/TypeScript code reviewer. 
+    You MUST analyze the following git diff and produce:
 
-Return using this exact template:
+    Status: (SAFE | RISKY | CRITICAL)
 
-Status: (SAFE | RISKY | CRITICAL)
-Findings:
-- bullet points...
-Suggested tests:
-- bullet points...
-Notes:
-- bullet points (if any)
+    Findings:
+    - Point out possible bugs, type errors, or runtime issues
+    - Security concerns (e.g., XSS, SQL injection, unsafe eval)
+    - Performance issues (e.g., nested loops, blocking async calls)
+    - Backwards-compatibility issues with TypeScript types or APIs
 
-Repo: ${owner}/${repo}
-PR: #${pull_number}
-Diff${truncated ? " (TRUNCATED)" : ""}:
-${diffForAI}
-`;
+    Suggested tests (using Jest):
+    - List concrete unit/integration test cases we should add
+    - Example: edge cases, error handling, async scenarios
+
+    Lint/Type Suggestions:
+    - Highlight any ESLint/Prettier style or TypeScript typing improvements
+    - Example: missing return types, unsafe any, unused variables
+
+    Notes:
+    - Add extra advice only if important
+
+    Repo: ${owner}/${repo}
+    PR: #${pull_number}
+    Diff${truncated ? " (TRUNCATED)" : ""}:
+    ${diffForAI}
+    `;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       temperature: 0.2,
       messages: [
-        { role: "system", content: "You are an expert software engineer and rigorous code reviewer." },
+        { role: "system", content: "You are an expert JS/TS software engineer and rigorous code reviewer." },
         { role: "user", content: prompt },
       ],
     });
@@ -84,10 +90,22 @@ ${diffForAI}
     });
 
     console.log("AI feedback posted to PR.");
+
+    // 5) Parse Status from AI output
+    const statusMatch = aiFeedback.match(/Status:\s*(SAFE|RISKY|CRITICAL)/i);
+    if (statusMatch) {
+      const status = statusMatch[1].toUpperCase();
+      console.log(`Detected AI status: ${status}`);
+      if (status === "CRITICAL") {
+        console.error("❌ Merge blocked due to critical issues detected by AI.");
+        process.exit(1); // Fail the GitHub Action job
+      }
+    } else {
+      console.warn("⚠️ No Status line found in AI feedback. Defaulting to SAFE.");
+    }
   } catch (err) {
     console.error("AI Merge Checker error:", err);
-    // Fail the job only if you want the status check to show as failed.
-    // For MVP, we'll still pass but log the error.
+    process.exit(1); // Fail the job if script itself crashes
   }
 }
 
