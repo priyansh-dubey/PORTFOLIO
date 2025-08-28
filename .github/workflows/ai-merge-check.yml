@@ -1,0 +1,48 @@
+name: AI Merge Checker
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    # Optional: limit to certain paths
+    # paths:
+    #   - "src/**"
+    #   - "!**/*.md"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  ai-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR HEAD
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Get base and head SHAs
+        id: sha
+        run: |
+          echo "BASE_SHA=${{ github.event.pull_request.base.sha }}" >> $GITHUB_OUTPUT
+          echo "HEAD_SHA=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
+          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps (OpenAI + Octokit)
+        run: npm install openai @octokit/rest
+
+      - name: Run AI Merge Checker
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          BASE_SHA: ${{ steps.sha.outputs.BASE_SHA }}
+          HEAD_SHA: ${{ steps.sha.outputs.HEAD_SHA }}
+          PR_NUMBER: ${{ steps.sha.outputs.PR_NUMBER }}
+        run: node .github/scripts/ai-merge-check.cjs
