@@ -3,10 +3,6 @@ name: AI Merge Checker
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    # Optional: limit to certain paths
-    # paths:
-    #   - "src/**"
-    #   - "!**/*.md"
 
 permissions:
   contents: read
@@ -35,8 +31,17 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install deps (OpenAI + Octokit)
-        run: npm install openai @octokit/rest
+      - name: Install deps (OpenAI + Octokit + analysis)
+        run: npm install openai @octokit/rest dependency-cruiser ts-morph fast-glob
+
+      - name: Build dependency graph
+        run: node .github/scripts/build-dep-graph.cjs
+
+      - name: Compute impact
+        env:
+          BASE_SHA: ${{ steps.sha.outputs.BASE_SHA }}
+          HEAD_SHA: ${{ steps.sha.outputs.HEAD_SHA }}
+        run: node .github/scripts/impact-analysis.cjs
 
       - name: Run AI Merge Checker
         env:
